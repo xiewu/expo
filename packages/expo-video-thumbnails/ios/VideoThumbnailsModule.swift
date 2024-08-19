@@ -7,10 +7,19 @@ public class VideoThumbnailsModule: Module {
   public func definition() -> ModuleDefinition {
     Name("ExpoVideoThumbnails")
 
-    AsyncFunction("getThumbnail", getVideoThumbnail).runOnQueue(.main)
+    AsyncFunction("getThumbnail", getVideoThumbnail)
+    AsyncFunction("getThumbnails", getVideoThumbnails)
+
+    Class(VideoThumbnail.self) {
+      Property("uri", \.uri?.absoluteString)
+      Property("width", \.image.width)
+      Property("height", \.image.height)
+      Property("requestedTime", \.requestedTime.seconds)
+      Property("actualTime", \.actualTime.seconds)
+    }
   }
 
-  internal func getVideoThumbnail(sourceFilename: URL, options: VideoThumbnailsOptions) throws -> [String: Any] {
+  internal func getVideoThumbnails(sourceFilename: URL, options: VideoThumbnailsOptions) async throws -> [VideoThumbnail] {
     if sourceFilename.isFileURL {
       guard FileSystemUtilities.permissions(appContext, for: sourceFilename).contains(.read) else {
         throw FileSystemReadPermissionException(sourceFilename.absoluteString)
@@ -30,42 +39,25 @@ public class VideoThumbnailsModule: Module {
     if time < asset.duration {
       generator.requestedTimeToleranceBefore = .zero
     }
-
-    let imgRef = try generator.copyCGImage(at: time, actualTime: nil)
-    let thumbnail = UIImage.init(cgImage: imgRef)
-    let savedImageUrl = try saveImage(image: thumbnail, quality: options.quality)
-
-    return [
-      "uri": savedImageUrl.absoluteString,
-      "width": thumbnail.size.width,
-      "height": thumbnail.size.height
-    ]
+    return try await generateThumbnails(generator: generator, at: [time])
   }
 
-  /**
-  Saves the image as a file.
-  */
-  internal func saveImage(image: UIImage, quality: Double) throws -> URL {
-    let directory = appContext?.config.cacheDirectory?.appendingPathComponent("VideoThumbnails")
-    let fileName = UUID().uuidString.appending(".jpg")
-    let fileUrl = directory?.appendingPathComponent(fileName)
-
-    FileSystemUtilities.ensureDirExists(at: directory)
-
-    guard let data = image.jpegData(compressionQuality: CGFloat(quality)) else {
-      throw CorruptedImageDataException()
-    }
-
-    guard let fileUrl else {
-      throw ImageWriteFailedException("Unrecognized url \(String(describing: fileUrl?.path))")
-    }
-
-    do {
-      try data.write(to: fileUrl, options: .atomic)
-    } catch let error {
-      throw ImageWriteFailedException(error.localizedDescription)
-    }
-
-    return fileUrl
+  internal func getVideoThumbnail(sourceFilename: URL, options: VideoThumbnailsOptions) async throws -> VideoThumbnail {
+    return try await getVideoThumbnails(sourceFilename: sourceFilename, options: options).first!
   }
+}
+
+fileprivate func generateThumbnails(generator: AVAssetImageGenerator, at times: [CMTime]) async throws -> [VideoThumbnail] {
+  if #available(iOS 16, *) {
+    return try await generator
+      .images(for: times)
+      .reduce(into: [VideoThumbnail]()) { thumbnails, result in
+        let thumbnail = try VideoThumbnail(result.image, requestedTime: result.requestedTime, actualTime: result.actualTime)
+        thumbnails.append(thumbnail)
+      }
+  }
+  return try await VideoThumbnailGenerator(generator: generator, times: times)
+    .reduce(into: [VideoThumbnail]()) { thumbnails, thumbnail in
+      thumbnails.append(thumbnail)
+    }
 }

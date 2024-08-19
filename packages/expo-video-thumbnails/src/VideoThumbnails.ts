@@ -18,3 +18,10 @@ export async function getThumbnailAsync(
 ): Promise<VideoThumbnailsResult> {
   return await ExpoVideoThumbnails.getThumbnail(sourceFilename, options);
 }
+
+export async function getThumbnailsAsync(
+  source: string,
+  options: VideoThumbnailsOptions = {}
+): Promise<VideoThumbnailsResult> {
+  return await ExpoVideoThumbnails.getThumbnailsAsync(source, options);
+}
