@@ -9,6 +9,12 @@
 #import <ReactCommon/RCTRuntimeExecutor.h>
 #endif // React Native >=0.74
 
+#import <React/RCTBridge+Private.h>
+#import <ExpoModulesCoreJSI/JSIRuntimeProvider.h>
+
+@interface RCTBridge (ExpoRuntimeProvider) <JSIRuntimeProviderObjC>
+@end
+
 @implementation ExpoBridgeModule
 
 @synthesize bridge = _bridge;
@@ -46,14 +52,16 @@ RCT_EXPORT_MODULE(ExpoModulesCore);
   _appContext.reactBridge = bridge;
 
 #if !__has_include(<ReactCommon/RCTRuntimeExecutor.h>)
-  _appContext._runtime = [EXJavaScriptRuntimeManager runtimeFromBridge:bridge];
+  [_appContext setRuntimeFromBridge:bridge];
+//  _appContext._runtime = [EXJavaScriptRuntimeManager runtimeFromBridge:bridge];
 #endif // React Native <0.74
 }
 
 #if __has_include(<ReactCommon/RCTRuntimeExecutor.h>)
 - (void)setRuntimeExecutor:(RCTRuntimeExecutor *)runtimeExecutor
 {
-  _appContext._runtime = [EXJavaScriptRuntimeManager runtimeFromBridge:_bridge withExecutor:runtimeExecutor];
+//  [_appContext setRuntimeFromBridge:_bridge];
+  [_appContext setRuntimeWithProvider:(id<JSIRuntimeProviderObjC>)_bridge];
 }
 #endif // React Native >=0.74
 
@@ -77,10 +85,10 @@ RCT_EXPORT_MODULE(ExpoModulesCore);
  */
 RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(installModules)
 {
-  if (_bridge && !_appContext._runtime) {
+  if (_bridge && ![_appContext isRuntimeSet]) {
     // TODO: Keep this condition until we remove the other way of installing modules.
     // See `setBridge` method above.
-    _appContext._runtime = [EXJavaScriptRuntimeManager runtimeFromBridge:_bridge];
+    [_appContext setRuntimeWithProvider:(id<JSIRuntimeProviderObjC>)_bridge];
   }
   return nil;
 }

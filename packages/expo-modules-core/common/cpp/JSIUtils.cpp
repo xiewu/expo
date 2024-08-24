@@ -143,4 +143,37 @@ void defineProperty(jsi::Runtime &runtime, jsi::Object *object, const char *name
   });
 }
 
+bool isWeakRefSupported(jsi::Runtime &runtime) {
+  return runtime.global().hasProperty(runtime, "WeakRef");
+}
+
+std::shared_ptr<jsi::Object> createWeakRef(jsi::Runtime &runtime, std::shared_ptr<jsi::Object> object) {
+  jsi::Object weakRef = runtime
+    .global()
+    .getProperty(runtime, "WeakRef")
+    .asObject(runtime)
+    .asFunction(runtime)
+    .callAsConstructor(runtime, jsi::Value(runtime, *object))
+    .asObject(runtime);
+  return std::make_shared<jsi::Object>(std::move(weakRef));
+}
+
+std::shared_ptr<jsi::Object> derefWeakRef(jsi::Runtime &runtime, std::shared_ptr<jsi::Object> object) {
+  jsi::Value derefFunction = object->getProperty(runtime, "deref");
+
+  if (!derefFunction.isObject()) {
+    // If there is no `deref` function, it's possible that WeakRef is not supported here and we can just return the passed object.
+    return object;
+  }
+  jsi::Value ref = derefFunction
+    .asObject(runtime)
+    .asFunction(runtime)
+    .callWithThis(runtime, *object);
+
+  if (ref.isUndefined()) {
+    return nullptr;
+  }
+  return std::make_shared<jsi::Object>(ref.asObject(runtime));
+}
+
 } // namespace expo::common

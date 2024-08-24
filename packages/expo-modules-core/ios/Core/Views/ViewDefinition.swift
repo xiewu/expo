@@ -1,5 +1,7 @@
 // Copyright 2022-present 650 Industries. All rights reserved.
 
+import ExpoModulesCoreJSI
+
 /**
  A definition representing the native view to export to React.
  */

@@ -75,11 +75,12 @@ Pod::Spec.new do |s|
   s.dependency 'React-RCTAppDelegate'
   s.dependency 'React-NativeModulesApple'
   s.dependency 'React-RCTFabric'
+  s.dependency 'ExpoModulesCoreJSI'
 
   install_modules_dependencies(s)
 
   s.source_files = 'ios/**/*.{h,m,mm,swift,cpp}', 'common/cpp/**/*.{h,cpp}'
-  s.exclude_files = ['ios/Tests/']
+  s.exclude_files = ['ios/Tests/', 'ios/JSI/', 'ios/ExpoModulesCoreJSI.xcframework/']
   s.compiler_flags = compiler_flags
   s.private_header_files = ['ios/**/*+Private.h', 'ios/**/Swift.h']
 

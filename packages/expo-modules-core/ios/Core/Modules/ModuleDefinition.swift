@@ -1,3 +1,5 @@
+import ExpoModulesCoreJSI
+
 /**
  The definition of the module. It is used to define some parameters
  of the module and what it exports to the JavaScript world.

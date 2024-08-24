@@ -71,6 +71,12 @@ void defineProperty(jsi::Runtime &runtime, jsi::Object *object, const char *name
  */
 void defineProperty(jsi::Runtime &runtime, jsi::Object *object, const char *name, jsi::Object descriptor);
 
+#pragma mark - WeakRef
+
+bool isWeakRefSupported(jsi::Runtime &runtime);
+std::shared_ptr<jsi::Object> createWeakRef(jsi::Runtime &runtime, std::shared_ptr<jsi::Object> object);
+std::shared_ptr<jsi::Object> derefWeakRef(jsi::Runtime &runtime, std::shared_ptr<jsi::Object> object);
+
 } // namespace expo::common
 
 #endif // __cplusplus

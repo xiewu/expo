@@ -42,9 +42,9 @@ RCT_EXPORT_MODULE(EXReactNativeEventEmitter)
   NSMutableSet<NSString *> *eventsAccumulator = [NSMutableSet set];
 
   // Backwards compatibility for the new architecture
-  if (_appContext) {
-    [eventsAccumulator addObjectsFromArray:[_appContext getSupportedEvents]];
-  }
+//  if (_appContext) {
+//    [eventsAccumulator addObjectsFromArray:[_appContext getSupportedEvents]];
+//  }
   for (EXExportedModule *exportedModule in [_exModuleRegistry getAllExportedModules]) {
     if ([exportedModule conformsToProtocol:@protocol(EXEventEmitter)]) {
       id<EXEventEmitter> eventEmitter = (id<EXEventEmitter>)exportedModule;

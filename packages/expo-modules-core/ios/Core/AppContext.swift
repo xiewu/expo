@@ -1,4 +1,5 @@
 import React
+import ExpoModulesCoreJSI
 
 /**
  The app context is an interface to a single Expo app.
@@ -8,7 +9,7 @@ public final class AppContext: NSObject {
   internal static func create() -> AppContext {
     let appContext = AppContext()
 
-    appContext._runtime = ExpoRuntime()
+    appContext._runtime = JavaScriptRuntime()
     return appContext
   }
 
@@ -50,25 +51,34 @@ public final class AppContext: NSObject {
   /**
    Underlying JSI runtime of the running app.
    */
-  @objc
-  public var _runtime: ExpoRuntime? {
+  public var _runtime: JavaScriptRuntime? {
     didSet {
       if _runtime == nil {
         // When the runtime is unpinned from the context (e.g. deallocated),
         // we should make sure to release all JS objects from the memory.
         // Otherwise the JSCRuntime asserts may fail on deallocation.
         releaseRuntimeObjects()
-      } else if _runtime != oldValue {
+      } else if _runtime !== oldValue {
         // Try to install the core object automatically when the runtime changes.
         try? prepareRuntime()
       }
     }
   }
 
+  @objc
+  public func isRuntimeSet() -> Bool {
+    return _runtime != nil
+  }
+
+  @objc
+  public func setRuntime(provider: JSIRuntimeProviderObjC) {
+    _runtime = JavaScriptRuntime(provider: provider)
+  }
+
   /**
    JSI runtime of the running app.
    */
-  public var runtime: ExpoRuntime {
+  public var runtime: JavaScriptRuntime {
     get throws {
       if let runtime = _runtime {
         return runtime
@@ -297,7 +307,7 @@ public final class AppContext: NSObject {
    Returns a JavaScript object that represents a module with given name.
    When remote debugging is enabled, this will always return `nil`.
    */
-  @objc
+//  @objc
   public func getNativeModuleObject(_ moduleName: String) -> JavaScriptObject? {
     return moduleRegistry.get(moduleHolderForName: moduleName)?.javaScriptObject
   }
@@ -394,21 +404,21 @@ public final class AppContext: NSObject {
     try coreModuleHolder.definition.decorate(object: coreObject, appContext: self)
 
     // Initialize `global.expo`.
-    try runtime.initializeCoreObject(coreObject)
+//    try runtime.initializeCoreObject(coreObject)
 
     // Install `global.expo.EventEmitter`.
-    EXJavaScriptRuntimeManager.installEventEmitterClass(runtime)
-
-    // Install `global.expo.SharedObject`.
-    EXJavaScriptRuntimeManager.installSharedObjectClass(runtime) { [weak sharedObjectRegistry] objectId in
-      sharedObjectRegistry?.delete(objectId)
-    }
-
-    // Install `global.expo.NativeModule`.
-    EXJavaScriptRuntimeManager.installNativeModuleClass(runtime)
-
-    // Install the modules host object as the `global.expo.modules`.
-    EXJavaScriptRuntimeManager.installExpoModulesHostObject(self)
+//    EXJavaScriptRuntimeManager.installEventEmitterClass(runtime)
+//
+//    // Install `global.expo.SharedObject`.
+//    EXJavaScriptRuntimeManager.installSharedObjectClass(runtime) { [weak sharedObjectRegistry] objectId in
+//      sharedObjectRegistry?.delete(objectId)
+//    }
+//
+//    // Install `global.expo.NativeModule`.
+//    EXJavaScriptRuntimeManager.installNativeModuleClass(runtime)
+//
+//    // Install the modules host object as the `global.expo.modules`.
+//    EXJavaScriptRuntimeManager.installExpoModulesHostObject(self)
   }
 
   /**
