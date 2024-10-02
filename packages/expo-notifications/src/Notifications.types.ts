@@ -166,6 +166,18 @@ export interface WeeklyNotificationTrigger {
 }
 
 /**
+ * A trigger related to a monthly notification.
+ * > The same functionality will be achieved on iOS with a `CalendarNotificationTrigger`.
+ * @platform android
+ */
+export interface MonthlyNotificationTrigger {
+  type: 'monthly';
+  day: number;
+  hour: number;
+  minute: number;
+}
+
+/**
  * A trigger related to a yearly notification.
  * > The same functionality will be achieved on iOS with a `CalendarNotificationTrigger`.
  * @platform android
@@ -243,6 +255,7 @@ export type NotificationTrigger =
   | TimeIntervalNotificationTrigger
   | DailyNotificationTrigger
   | WeeklyNotificationTrigger
+  | MonthlyNotificationTrigger
   | YearlyNotificationTrigger
   | UnknownNotificationTrigger;
 
@@ -261,6 +274,7 @@ export enum SchedulableTriggerInputTypes {
   CALENDAR = 'calendar',
   DAILY = 'daily',
   WEEKLY = 'weekly',
+  MONTHLY = 'monthly',
   YEARLY = 'yearly',
   DATE = 'date',
   TIME_INTERVAL = 'timeInterval',
@@ -312,6 +326,19 @@ export type WeeklyTriggerInput = {
   type: SchedulableTriggerInputTypes.WEEKLY;
   channelId?: string;
   weekday: number;
+  hour: number;
+  minute: number;
+};
+
+/**
+ * This trigger input will cause the notification to be delivered once per month
+ * when the `day`, `hour`, and `minute` date components match the specified values.
+ * > **Note:** All properties are specified in JavaScript `Date` object's ranges.
+ */
+export type MonthlyTriggerInput = {
+  type: SchedulableTriggerInputTypes.MONTHLY;
+  channelId?: string;
+  day: number;
   hour: number;
   minute: number;
 };
@@ -370,6 +397,7 @@ export type SchedulableNotificationTriggerInput =
   | TimeIntervalTriggerInput
   | DailyTriggerInput
   | WeeklyTriggerInput
+  | MonthlyTriggerInput
   | YearlyTriggerInput
   | DateTriggerInput;
 
