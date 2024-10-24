@@ -28,44 +28,32 @@ files={{
   }}
 dependencies={['expo-asset', 'expo-image-manipulator']}>
 
-```jsx
-import { useState, useEffect } from 'react';
-import { Button, Image, StyleSheet, View } from 'react-native';
-import { Asset } from 'expo-asset';
-import { manipulateAsync, FlipType, SaveFormat } from 'expo-image-manipulator';
+```tsx
+import { Image } from 'expo-image';
+import { ImageManipulator, ImageRef } from 'expo-image-manipulator';
+import { useState } from 'react';
+import { Button, StyleSheet, View } from 'react-native';
+
+const IMAGE_URL = `https://picsum.photos/seed/${1 + Math.round(Math.random() * 1000)}/600`;
 
 export default function App() {
-  const [ready, setReady] = useState(false);
-  const [image, setImage] = useState(null);
+  const [image, setImage] = useState<ImageRef | string>(IMAGE_URL);
 
-  useEffect(() => {
-    (async () => {
-      const image = Asset.fromModule(require('./assets/snack-icon.png'));
-      await image.downloadAsync();
-      setImage(image);
-      setReady(true);
-    })();
-  }, []);
+  async function rotateAndFlip() {
+    const newImage = await ImageManipulator.manipulate(image)
+      .rotate(90)
+      .flip('vertical')
+      .renderAsync();
 
-  const _rotate90andFlip = async () => {
-    const manipResult = await manipulateAsync(
-      image.localUri || image.uri,
-      [{ rotate: 90 }, { flip: FlipType.Vertical }],
-      { compress: 1, format: SaveFormat.PNG }
-    );
-    setImage(manipResult);
-  };
-
-  const _renderImage = () => (
-    <View style={styles.imageContainer}>
-      <Image source={{ uri: image.localUri || image.uri }} style={styles.image} />
-    </View>
-  );
+    setImage(newImage);
+  }
 
   return (
     <View style={styles.container}>
-      {ready && image && _renderImage()}
-      <Button title="Rotate and Flip" onPress={_rotate90andFlip} />
+      <View style={styles.imageContainer}>
+        <Image source={image} style={styles.image} />
+      </View>
+      <Button title="Rotate and Flip" onPress={rotateAndFlip} />
     </View>
   );
 }
