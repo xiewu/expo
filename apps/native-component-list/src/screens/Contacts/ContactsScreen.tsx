@@ -125,7 +125,8 @@ function ContactsView({ navigation }: Props) {
 
   return (
     <>
-      <ContactsList
+      <Contacts.ContactsAccessButton queryString="D" style={{ height: 70, margin: 20 }} />
+      {/* <ContactsList
         onEndReachedThreshold={-1.5}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={() => loadAsync({}, true)} />
@@ -147,7 +148,7 @@ function ContactsView({ navigation }: Props) {
             {selectedContact && <MonoText>{JSON.stringify(selectedContact, null, 2)}</MonoText>}
           </>
         )}
-      />
+      /> */}
     </>
   );
 }

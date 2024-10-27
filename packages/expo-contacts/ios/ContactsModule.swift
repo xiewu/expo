@@ -324,6 +324,8 @@ public class ContactsModule: Module, OnContactPickingResultHandler {
         reject: promise.legacyRejecter
       )
     }
+
+    View(ContactAccessButtonView.self)
   }
 
   func didPickContact(contact: CNContact) throws {
