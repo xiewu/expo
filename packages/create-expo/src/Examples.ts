@@ -19,6 +19,8 @@ import { fetch } from './utils/fetch';
 const debug = require('debug')('expo:init:template') as typeof console.log;
 const pipeline = promisify(Stream.pipeline);
 
+const examplesRepoName = process.env.EXPO_EXAMPLES_REPO_NAME ?? 'expo/examples';
+
 /**
  * The partial GitHub content type, used to filter out examples.
  * @see https://docs.github.com/en/rest/repos/contents?apiVersion=2022-11-28
@@ -31,9 +33,9 @@ export type GithubContent = {
 
 /** List all existing examples directory from https://github.com/expo/examples. */
 async function listExamplesAsync() {
-  const response = await fetch('https://api.github.com/repos/expo/examples/contents');
+  const response = await fetch(`https://api.github.com/repos/${examplesRepoName}/contents`);
   if (!response.ok) {
-    throw new Error('Unexpected GitHub API response: https://github.com/expo/examples');
+    throw new Error(`Unexpected GitHub API response: https://github.com/${examplesRepoName}`);
   }
 
   const data = (await response.json()) as GithubContent[];
@@ -43,7 +45,7 @@ async function listExamplesAsync() {
 /** Determine if an example exists, using only its name */
 async function hasExampleAsync(name: string) {
   const response = await fetch(
-    `https://api.github.com/repos/expo/examples/contents/${encodeURIComponent(name)}/package.json`
+    `https://api.github.com/repos/${examplesRepoName}/contents/${encodeURIComponent(name)}/package.json`
   );
 
   // Either ok or 404 responses are expected
@@ -56,7 +58,7 @@ async function hasExampleAsync(name: string) {
 
 export async function ensureExampleExists(name: string) {
   if (!(await hasExampleAsync(name))) {
-    throw new Error(`Example "${name}" does not exist, see https://github.com/expo/examples`);
+    throw new Error(`Example "${name}" does not exist, see https://github.com/${examplesRepoName}`);
   }
 }
 
@@ -90,17 +92,21 @@ export async function promptExamplesAsync() {
 /** Download and move the selected example from https://github.com/expo/examples. */
 export async function downloadAndExtractExampleAsync(root: string, name: string) {
   const projectName = path.basename(root);
-  const response = await fetch('https://codeload.github.com/expo/examples/tar.gz/master');
+  const response = await fetch(`https://codeload.github.com/${examplesRepoName}/tar.gz/master`);
   if (!response.ok) {
     debug(`Failed to fetch the examples code, received status "${response.status}"`);
-    throw new Error('Failed to fetch the examples code from https://github.com/expo/examples');
+    throw new Error(
+      `Failed to fetch the examples code from https://github.com/${examplesRepoName}`
+    );
   }
 
   if (!response.body) {
     debug(
       `Failed to fetch the examples code, Github responded without content, received status "${response.status}"`
     );
-    throw new Error('Failed to fetch the examples code from https://github.com/expo/examples');
+    throw new Error(
+      `Failed to fetch the examples code from https://github.com/${examplesRepoName}`
+    );
   }
 
   await pipeline(
