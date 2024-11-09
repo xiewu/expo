@@ -20,6 +20,7 @@ const debug = require('debug')('expo:init:template') as typeof console.log;
 const pipeline = promisify(Stream.pipeline);
 
 const examplesRepoName = process.env.EXPO_EXAMPLES_REPO_NAME ?? 'expo/examples';
+const examplesRepoBranch = process.env.EXPO_EXAMPLES_REPO_BRANCH ?? 'master';
 
 /**
  * The partial GitHub content type, used to filter out examples.
@@ -44,8 +45,9 @@ async function listExamplesAsync() {
 
 /** Determine if an example exists, using only its name */
 async function hasExampleAsync(name: string) {
+  const queryParameter = examplesRepoBranch !== 'master' ? `?ref=${examplesRepoBranch}` : '';
   const response = await fetch(
-    `https://api.github.com/repos/${examplesRepoName}/contents/${encodeURIComponent(name)}/package.json`
+    `https://api.github.com/repos/${examplesRepoName}/contents/${encodeURIComponent(name)}/package.json${queryParameter}`
   );
 
   // Either ok or 404 responses are expected
@@ -92,7 +94,9 @@ export async function promptExamplesAsync() {
 /** Download and move the selected example from https://github.com/expo/examples. */
 export async function downloadAndExtractExampleAsync(root: string, name: string) {
   const projectName = path.basename(root);
-  const response = await fetch(`https://codeload.github.com/${examplesRepoName}/tar.gz/master`);
+  const response = await fetch(
+    `https://codeload.github.com/${examplesRepoName}/tar.gz/${examplesRepoBranch}`
+  );
   if (!response.ok) {
     debug(`Failed to fetch the examples code, received status "${response.status}"`);
     throw new Error(
@@ -118,7 +122,7 @@ export async function downloadAndExtractExampleAsync(root: string, name: string)
         onentry: createEntryResolver(projectName),
         strip: 2,
       },
-      [`examples-master/${name}`]
+      [`examples-${examplesRepoBranch}/${name}`]
     )
   );
 
