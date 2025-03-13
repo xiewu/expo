@@ -1,4 +1,5 @@
-#!/usr/bin/env node
+#!/usr/bin/env yarn --silent ts-node --transpile-only
+import spawnAsync from '@expo/spawn-async';
 import chalk from 'chalk';
 import { Command } from 'commander';
 import fs from 'fs';
@@ -79,4 +80,8 @@ async function fetchSchemaAsync(version: string): Promise<Record<string, any>> {
   const filepath = `src/ExpoConfig.ts`;
   await fs.promises.mkdir(path.dirname(filepath), { recursive: true });
   await fs.promises.writeFile(filepath, ts, 'utf8');
+  // Fix lint spacing and indenting to avoid spurious diffs
+  await spawnAsync('yarn', ['lint', '--fix'], {
+    stdio: 'ignore',
+  });
 })();
