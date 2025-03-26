@@ -156,6 +156,16 @@ public class CalendarModule: Module {
       return serialize(attendees: attendees)
     }
 
+    Permission("readReminders") {
+      Checker {
+        return true
+      }
+      
+      Requester {
+        return false
+      }
+    }
+
     AsyncFunction("getRemindersAsync") { (startDateStr: String?, endDateStr: String?, calendarIds: [String?], status: String?, promise: Promise) in
       try checkRemindersPermissions()
       var reminderCalendars = [EKCalendar]()
@@ -181,7 +191,8 @@ public class CalendarModule: Module {
           promise.resolve([])
         }
       }
-    }
+    }.requires("readReminders")
+      
 
     AsyncFunction("getReminderByIdAsync") { (reminderId: String) -> [String: Any?]  in
       try checkRemindersPermissions()
