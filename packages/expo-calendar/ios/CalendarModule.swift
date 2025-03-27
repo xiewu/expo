@@ -165,7 +165,7 @@ public class CalendarModule: Module {
           return PermissionStatus(granted: false)
         }
       }
-      
+
       Requester {
         return try await withCheckedThrowingContinuation { continuation in
           if #available(iOS 17.0, *) {
@@ -221,7 +221,7 @@ public class CalendarModule: Module {
         }
       }
     }.requires("readReminders")
-      
+
 
     AsyncFunction("getReminderByIdAsync") { (reminderId: String) -> [String: Any?]  in
       try checkRemindersPermissions()

@@ -8,7 +8,6 @@ public func Permission(
   )
 }
 
-
 public func Checker(
   @_implicitSelfCapture _ closure: @escaping () throws -> PermissionStatus
 ) -> PermissionCheckerDefinition<(), Void, PermissionStatus> {

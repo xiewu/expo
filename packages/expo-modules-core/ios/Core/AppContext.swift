@@ -16,7 +16,7 @@ public final class AppContext: NSObject {
    The app context configuration.
    */
   public let config: AppContextConfig
-  
+
   public let permissionRegistry: PermissionRegistry
 
   /**

@@ -72,17 +72,16 @@ public class AsyncFunctionDefinition<Args, FirstArgType, ReturnType>: AnyAsyncFu
   var takesOwner: Bool = false
 
   func call(by owner: AnyObject?, withArguments args: [Any], appContext: AppContext, callback: @escaping (FunctionCallResult) -> ()) {
-    
     let hasPermissions = requiredPermissions.reduce(true) { result, permissionName in
       let status = try? appContext.permissionRegistry.getPermission(name: permissionName)?.checker?.call(by: self, withArguments: [], appContext: appContext) as? PermissionStatus
       return result && (status?.granted ?? false)
    } == true
-    
+
      guard hasPermissions else {
        callback(.failure(Exceptions.PermissionsNotGranted()))
        return
     }
-    
+
     let promise = Promise(appContext: appContext) { value in
       callback(.success(Conversions.convertFunctionResult(value, appContext: appContext)))
     } rejecter: { exception in
