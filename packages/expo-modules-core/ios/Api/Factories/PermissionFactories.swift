@@ -9,9 +9,9 @@ public func Permission(
 }
 
 
-public func Checker<R>(
-  @_implicitSelfCapture _ closure: @escaping () throws -> R
-) -> PermissionCheckerDefinition<(), Void, R> {
+public func Checker(
+  @_implicitSelfCapture _ closure: @escaping () throws -> PermissionStatus
+) -> PermissionCheckerDefinition<(), Void, PermissionStatus> {
   return PermissionCheckerDefinition(
     firstArgType: Void.self,
     dynamicArgumentTypes: [],

@@ -42,7 +42,6 @@ const RemindersScreen: React.FC<Props> = ({ route }) => {
   }, [route.params]);
 
   const { request } = usePermissions(Calendar.permissions.readReminders);
-
   const findReminders = async (calendarId: string) => {
     const reminders = await Calendar.getRemindersAsync([calendarId], null, new Date(), new Date());
     setReminders(reminders);

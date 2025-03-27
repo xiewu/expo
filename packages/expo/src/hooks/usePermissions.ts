@@ -1,14 +1,19 @@
 import { useCallback, useMemo } from 'react';
 
+export type PermissionStatus = {
+  granted: boolean;
+  canAskAgain: boolean;
+};
+
 export type Permission = {
-  check: () => boolean;
-  request: () => boolean;
+  check: () => PermissionStatus;
+  request: () => PermissionStatus;
 };
 
 export function usePermissions(permissions: Permission[] | Permission) {
   const permissionsArray = Array.isArray(permissions) ? permissions : [permissions];
   const check = useCallback(
-    () => permissionsArray.reduce((result, current) => current.check() && result, true),
+    () => permissionsArray.reduce((result, current) => current.check().granted && result, true),
     [permissionsArray]
   );
   const request = useCallback(async () => {

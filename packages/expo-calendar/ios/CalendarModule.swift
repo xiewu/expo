@@ -158,11 +158,16 @@ public class CalendarModule: Module {
 
     Permission("readReminders") {
       Checker {
-        return true
+        do {
+          try self.checkRemindersPermissions()
+          return PermissionStatus(granted: true)
+        } catch {
+          return PermissionStatus(granted: false)
+        }
       }
       
       Requester {
-        return false
+        return PermissionStatus(granted: true, canAskAgain: true)
       }
     }
 

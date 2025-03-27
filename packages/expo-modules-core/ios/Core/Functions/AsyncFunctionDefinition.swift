@@ -73,12 +73,13 @@ public class AsyncFunctionDefinition<Args, FirstArgType, ReturnType>: AnyAsyncFu
 
   func call(by owner: AnyObject?, withArguments args: [Any], appContext: AppContext, callback: @escaping (FunctionCallResult) -> ()) {
     
-    let hasPermissions = ((requiredPermissions.reduce(true) { result, permissionName in
-      result && ((try? appContext.permissionRegistry.getPermission(name: permissionName)?.checker?.call(by: self, withArguments: [], appContext: appContext)) as? Bool ?? false)
-   }) == true)
+    let hasPermissions = requiredPermissions.reduce(true) { result, permissionName in
+      let status = try? appContext.permissionRegistry.getPermission(name: permissionName)?.checker?.call(by: self, withArguments: [], appContext: appContext) as? PermissionStatus
+      return result && (status?.granted ?? false)
+   } == true
     
      guard hasPermissions else {
-       callback(.failure(Exceptions.PermissionsModuleNotFound()))
+       callback(.failure(Exceptions.PermissionsNotGranted()))
        return
     }
     
