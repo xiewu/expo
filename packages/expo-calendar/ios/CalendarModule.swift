@@ -167,7 +167,31 @@ public class CalendarModule: Module {
       }
       
       Requester {
-        return PermissionStatus(granted: true, canAskAgain: true)
+        return try await withCheckedThrowingContinuation { continuation in
+          if #available(iOS 17.0, *) {
+            self.eventStore.requestFullAccessToEvents { [weak self] _, error in
+              guard let self else {
+                return continuation.resume(returning: PermissionStatus(granted: false))
+              }
+              if error != nil {
+                continuation.resume(returning: PermissionStatus(granted: false))
+              } else {
+                continuation.resume(returning: PermissionStatus(granted: true))
+              }
+            }
+          } else {
+            self.eventStore.requestAccess(to: .event) { [weak self] _, error in
+              guard let self else {
+                return continuation.resume(returning: PermissionStatus(granted: false))
+              }
+              if error != nil {
+                continuation.resume(returning: PermissionStatus(granted: false))
+              } else {
+                continuation.resume(returning: PermissionStatus(granted: true))
+              }
+            }
+          }
+        }
       }
     }
 
