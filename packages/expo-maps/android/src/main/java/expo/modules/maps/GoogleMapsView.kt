@@ -45,8 +45,8 @@ data class GoogleMapsViewProps(
 ) : ComposeProps
 
 @SuppressLint("ViewConstructor")
-class GoogleMapsView(context: Context, appContext: AppContext)
-  : ExpoComposeView<GoogleMapsViewProps>(context, appContext, withHostingView = true) {
+class GoogleMapsView(context: Context, appContext: AppContext) :
+  ExpoComposeView<GoogleMapsViewProps>(context, appContext, withHostingView = true) {
   override val props = GoogleMapsViewProps()
 
   private val onMapLoaded by EventDispatcher<Unit>()
